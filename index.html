@@ -536,6 +536,7 @@ let activeCat   = 'すべて';
 let searchQ     = '';
 let liffUser    = null;
 let customerSig = '';
+let facilityId  = '';
 let isCartOpen  = false;
 let currentPage = 'order';
 
@@ -685,6 +686,7 @@ window.addEventListener('DOMContentLoaded', async function() {
   // 商品ロード（cid URL パラメータを得意先IDとして使用、LINE userId は注文データのみに使用）
   const customerId = new URLSearchParams(window.location.search).get('cid') || '';
   customerSig = new URLSearchParams(window.location.search).get('sig') || '';
+  facilityId  = new URLSearchParams(window.location.search).get('cid') || '';
   const _ok = function(data) {
     if (data?.customer) {
       // ヘッダーは常に「シンクサポート」で固定
@@ -1062,7 +1064,7 @@ function submitOrder() {
     showCheckoutAlert('通信エラー。再度お試しください。');
   };
   if (USE_FETCH) {
-    gasPost({ _action:'submitOrder', _sig: customerSig, data:orderData }, _onSuccess, _onError);
+    gasPost({ _action:'submitOrder', _cid: facilityId, _sig: customerSig, data:orderData }, _onSuccess, _onError);
   } else {
     google.script.run.withSuccessHandler(_onSuccess).withFailureHandler(_onError).submitOrder(orderData);
   }
@@ -1210,7 +1212,7 @@ function submitEdit() {
   };
   const _err = function() { btn.disabled = false; btn.textContent = '変更を保存する'; alert('通信エラーが発生しました'); };
   if (USE_FETCH) {
-    gasPost({ _action: 'updateOrder', _sig: customerSig, data: { orderId: editingOrderId, items, deliveryDate } }, _done, _err);
+    gasPost({ _action: 'updateOrder', _cid: facilityId, _sig: customerSig, data: { orderId: editingOrderId, items, deliveryDate } }, _done, _err);
   } else {
     google.script.run.withSuccessHandler(_done).withFailureHandler(_err).updateOrder(editingOrderId, items, deliveryDate);
   }
