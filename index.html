@@ -818,11 +818,8 @@ function setCat(cat) {
   document.querySelectorAll('#catTabRow button').forEach(function(btn) {
     const c = btn.textContent.replace(/\d+/g,'').trim();
     const active = c===cat || btn.textContent.startsWith(cat+' ');
-    btn.className = btn.className
-      .replace(/bg-brand text-white border-brand|bg-white text-gray-600 border-gray-200 hover:border-brand\/50/g,'');
-    btn.className += active
-      ? ' bg-brand text-white border-brand'
-      : ' bg-white text-gray-600 border-gray-200 hover:border-brand/50';
+    btn.style.background = active ? '#ff734c' : '#ededed';
+    btn.style.color      = active ? '#fff'    : '#503c3c';
   });
   applyFilter();
 }
