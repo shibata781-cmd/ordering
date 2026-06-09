@@ -1020,6 +1020,7 @@ function openCheckout() {
 
 function closeCheckout() {
   document.getElementById('checkoutModal').style.display='none';
+  clearCheckoutAlert();
 }
 
 // ═══════════════ SUBMIT ═══════════════
@@ -1045,7 +1046,7 @@ function submitOrder() {
   localStorage.setItem(ACC_KEY, JSON.stringify({ facilityName:fName, contactName:cName, tel:document.getElementById('tel').value.trim(), email:document.getElementById('email').value.trim() }));
 
   const orderData = {
-    customerId:   liffUser?.userId||'',
+    customerId:   facilityId,
     lineUserId:   liffUser?.userId||'',
     facilityName: fName,
     contactName:  cName,
