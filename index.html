@@ -598,37 +598,45 @@ window.addEventListener('DOMContentLoaded', async function() {
   // LIFF ID（Line Developers Console で発行済み）
   const LIFF_ID = '2010287060-4ppXejSr';
 
-  const isLine    = typeof liff !== 'undefined';
-  const inClient  = isLine && liff.isInClient(); // init 前でも呼べる
+  const isLine   = typeof liff !== 'undefined';
   let profile    = null;
   let liffErrMsg = '';
+  let liffDbg    = 'isLine=' + isLine;
 
   if (isLine) {
+    liffDbg += ' inClient=' + liff.isInClient();
     try {
-      // タイムアウト撤廃：LINE クライアント内なら init は速く終わるはず
-      // 外部ブラウザの場合は 20 秒でモックへ
+      liffDbg += ' init...';
       await Promise.race([
         liff.init({ liffId: LIFF_ID }),
-        new Promise((_, reject) => setTimeout(
-          () => reject(new Error('timeout(inClient=' + inClient + ')')), 20000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 20000))
       ]);
+      liffDbg += 'OK';
 
-      if (!liff.isLoggedIn()) {
+      const loggedIn = liff.isLoggedIn();
+      liffDbg += ' loggedIn=' + loggedIn;
+
+      if (!loggedIn) {
         if (liff.isInClient()) {
+          liffDbg += ' →login()';
           liff.login({ redirectUri: location.href });
           return;
         }
         throw new Error('not in LINE client');
       }
 
+      liffDbg += ' getProfile...';
       const p = await liff.getProfile();
+      liffDbg += 'OK uid=' + p.userId.slice(0, 8);
       profile  = { userId: p.userId, displayName: p.displayName,
                    pictureUrl: p.pictureUrl, isMock: false };
     } catch (e) {
       liffErrMsg = e.message;
-      console.warn('LIFF init failed, using mock:', e.message);
+      liffDbg += ' ERR:' + e.message;
+      console.warn('LIFF init failed:', e.message);
     }
   }
+  liffErrMsg = liffDbg; // 常にデバッグ情報を表示
 
   // モックフォールバック（ブラウザ確認 or LIFF 失敗時）
   if (!profile) {
