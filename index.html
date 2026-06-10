@@ -666,9 +666,9 @@ window.addEventListener('DOMContentLoaded', async function() {
 
   renderBottomNav();
 
-  // リッチメニューからの page= パラメータでタブ遷移（doGet 経由で埋め込み）
-  var _initPage = (typeof INITIAL_PAGE !== 'undefined' && INITIAL_PAGE) ? INITIAL_PAGE : 'order';
-  if (_initPage === 'history' || _initPage === 'account') showPage(_initPage);
+  // リッチメニューからの page= パラメータ（showPage はデータロード後に呼ぶ）
+  var _initPage = (typeof INITIAL_PAGE !== 'undefined' && INITIAL_PAGE) ? INITIAL_PAGE :
+    (new URLSearchParams(window.location.search).get('page') || 'order');
 
   // アカウントページ LINE 表示
   document.getElementById('accLineName').textContent   = profile.displayName;
@@ -696,13 +696,32 @@ window.addEventListener('DOMContentLoaded', async function() {
     }
     setProducts(data?.products || []);
     restoreCartFromStorage(); // ページ初回ロード時のみカートを復元
+    if (_initPage !== 'order') showPage(_initPage); // データ取得後にタブ遷移
   };
   const _ng = function() {
     document.getElementById('loader').innerHTML =
       '<p class="text-red-400 text-sm text-center">読み込みエラー。ページを更新してください。</p>';
   };
   if (USE_FETCH) {
-    gasGet('initPage', customerId, customerSig, _ok, _ng);
+    if (customerId) {
+      gasGet('initPage', customerId, customerSig, _ok, _ng);
+    } else if (liffUser && !liffUser.isMock) {
+      // リッチメニューからのアクセス：LINE userId で得意先を特定
+      gasGet('initPageByLineUser', liffUser.userId, '', function(data) {
+        if (data && data.customerId) {
+          facilityId  = data.customerId;
+          customerSig = data.sig;
+          _ok(data);
+        } else {
+          document.getElementById('loader').innerHTML =
+            '<p style="color:#f97316;font-size:.9rem;text-align:center;padding:16px">⚠️ ' +
+            ((data && data.message) || 'この LINE アカウントは未登録です。管理者にお問い合わせください。') +
+            '<br><span style="font-size:.75rem;color:#9ca3af">' + liffUser.userId + '</span></p>';
+        }
+      }, _ng);
+    } else {
+      _ok({ products: [], customer: null });
+    }
   } else {
     google.script.run.withSuccessHandler(_ok).withFailureHandler(_ng).initPage(customerId);
   }
