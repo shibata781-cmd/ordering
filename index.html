@@ -599,7 +599,8 @@ window.addEventListener('DOMContentLoaded', async function() {
   const LIFF_ID = '2010287060-4ppXejSr';
 
   const isLine = typeof liff !== 'undefined';
-  let profile  = null;
+  let profile    = null;
+  let liffErrMsg = '';
 
   if (isLine) {
     try {
@@ -623,10 +624,8 @@ window.addEventListener('DOMContentLoaded', async function() {
       profile  = { userId: p.userId, displayName: p.displayName,
                    pictureUrl: p.pictureUrl, isMock: false };
     } catch (e) {
+      liffErrMsg = e.message;
       console.warn('LIFF init failed, using mock:', e.message);
-      // エラー内容を画面に表示して原因を特定
-      var dbg = document.getElementById('liffDebugMsg');
-      if (dbg) dbg.textContent = 'LIFF: ' + e.message;
     }
   }
 
@@ -738,6 +737,12 @@ window.addEventListener('DOMContentLoaded', async function() {
         var p = document.createElement('p');
         p.style.cssText = 'color:#6b7280;font-size:.9rem;text-align:center;padding:24px;line-height:1.6';
         p.textContent = 'LINE 公式アカウントのリッチメニューから\n「📦 発注する」をタップしてください。';
+        if (liffErrMsg) {
+          var span = document.createElement('span');
+          span.style.cssText = 'display:block;margin-top:8px;font-size:.7rem;color:#ef4444;word-break:break-all';
+          span.textContent = 'LIFF error: ' + liffErrMsg;
+          p.appendChild(span);
+        }
         document.getElementById('loader').replaceChildren(p);
       })();
     }
