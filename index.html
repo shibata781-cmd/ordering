@@ -607,7 +607,7 @@ window.addEventListener('DOMContentLoaded', async function() {
       // タイムアウト付きで liff.init() を実行（5秒で諦めてモックへ）
       await Promise.race([
         liff.init({ liffId: LIFF_ID }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 15000))
       ]);
 
       if (!liff.isLoggedIn()) {
