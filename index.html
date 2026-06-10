@@ -199,7 +199,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <div id="liffLoading">
       <div class="font-bold text-lg text-gray-800 mb-1">LINEからユーザー情報を取得中</div>
       <div class="text-sm text-gray-400 mb-4">少々お待ちください…</div>
-      <div id="liffDebugMsg" class="text-xs text-red-400 mt-2 max-w-xs text-center break-all"></div>
       <div class="dot-pulse flex gap-2 justify-center"><span></span><span></span><span></span></div>
     </div>
     <!-- Done state -->
@@ -598,45 +597,31 @@ window.addEventListener('DOMContentLoaded', async function() {
   // LIFF ID（Line Developers Console で発行済み）
   const LIFF_ID = '2010287060-4ppXejSr';
 
-  const isLine   = typeof liff !== 'undefined';
-  let profile    = null;
-  let liffErrMsg = '';
-  let liffDbg    = 'isLine=' + isLine;
+  const isLine = typeof liff !== 'undefined';
+  let profile  = null;
 
   if (isLine) {
-    liffDbg += ' inClient=' + liff.isInClient();
     try {
-      liffDbg += ' init...';
       await Promise.race([
         liff.init({ liffId: LIFF_ID }),
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 20000))
       ]);
-      liffDbg += 'OK';
 
-      const loggedIn = liff.isLoggedIn();
-      liffDbg += ' loggedIn=' + loggedIn;
-
-      if (!loggedIn) {
+      if (!liff.isLoggedIn()) {
         if (liff.isInClient()) {
-          liffDbg += ' →login()';
           liff.login({ redirectUri: location.href });
           return;
         }
         throw new Error('not in LINE client');
       }
 
-      liffDbg += ' getProfile...';
       const p = await liff.getProfile();
-      liffDbg += 'OK uid=' + p.userId.slice(0, 8);
       profile  = { userId: p.userId, displayName: p.displayName,
                    pictureUrl: p.pictureUrl, isMock: false };
     } catch (e) {
-      liffErrMsg = e.message;
-      liffDbg += ' ERR:' + e.message;
       console.warn('LIFF init failed:', e.message);
     }
   }
-  liffErrMsg = liffDbg; // 常にデバッグ情報を表示
 
   // モックフォールバック（ブラウザ確認 or LIFF 失敗時）
   if (!profile) {
@@ -741,11 +726,11 @@ window.addEventListener('DOMContentLoaded', async function() {
         }
       }, _ng);
     } else {
-      // モック動作中または LINE アプリ外のアクセス
+      // LINE アプリ外（PC ブラウザ等）からのアクセス
       (function() {
         var p = document.createElement('p');
-        p.style.cssText = 'color:#6b7280;font-size:.85rem;text-align:center;padding:16px;line-height:1.8;word-break:break-all';
-        p.textContent = 'LINE公式リッチメニューから開いてください\n[DBG:' + liffDbg + ']';
+        p.style.cssText = 'color:#6b7280;font-size:.9rem;text-align:center;padding:24px;line-height:1.6';
+        p.textContent = 'LINE 公式アカウントのリッチメニューから\n「📦 発注する」をタップしてください。';
         document.getElementById('loader').replaceChildren(p);
       })();
     }
