@@ -291,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div>
           <div class="text-sm font-semibold text-gray-800" id="accLineName"></div>
           <div class="text-xs" id="accLineStatus"></div>
+          <div class="text-xs text-gray-400 mt-0.5 select-all" id="accLineId"></div>
         </div>
       </div>
       <div class="bg-white rounded-xl border border-gray-100 p-5 space-y-4">
@@ -674,6 +675,7 @@ window.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('accLineName').textContent   = profile.displayName;
   document.getElementById('accLineStatus').textContent = profile.isMock ? '🔧 モック動作中' : '✓ LINE ログイン済み';
   document.getElementById('accLineStatus').className   = 'text-xs ' + (profile.isMock ? 'text-amber-500' : 'text-line');
+  document.getElementById('accLineId').textContent     = profile.userId;
   document.getElementById('accountLineStatus').classList.remove('hidden');
 
   // 配送日デフォルト（最短2営業日・土日祝除く）
@@ -727,7 +729,13 @@ window.addEventListener('DOMContentLoaded', async function() {
         }
       }, _ng);
     } else {
-      _ok({ products: [], customer: null });
+      // モック動作中または LINE アプリ外のアクセス
+      (function() {
+        var p = document.createElement('p');
+        p.style.cssText = 'color:#6b7280;font-size:.9rem;text-align:center;padding:24px;line-height:1.6';
+        p.textContent = 'LINE 公式アカウントのリッチメニューから\n「📦 発注する」をタップしてください。';
+        document.getElementById('loader').replaceChildren(p);
+      })();
     }
   } else {
     google.script.run.withSuccessHandler(_ok).withFailureHandler(_ng).initPage(customerId);
