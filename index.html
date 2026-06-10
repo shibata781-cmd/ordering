@@ -713,10 +713,17 @@ window.addEventListener('DOMContentLoaded', async function() {
           customerSig = data.sig;
           _ok(data);
         } else {
-          document.getElementById('loader').innerHTML =
-            '<p style="color:#f97316;font-size:.9rem;text-align:center;padding:16px">⚠️ ' +
-            ((data && data.message) || 'この LINE アカウントは未登録です。管理者にお問い合わせください。') +
-            '<br><span style="font-size:.75rem;color:#9ca3af">' + liffUser.userId + '</span></p>';
+          (function() {
+            var p = document.createElement('p');
+            p.style.cssText = 'color:#f97316;font-size:.9rem;text-align:center;padding:16px';
+            p.textContent = '⚠️ ' + ((data && data.message) || 'この LINE アカウントは未登録です。管理者にお問い合わせください。');
+            var br = document.createElement('br');
+            var span = document.createElement('span');
+            span.style.cssText = 'font-size:.75rem;color:#9ca3af';
+            span.textContent = liffUser.userId;
+            p.append(br, span);
+            document.getElementById('loader').replaceChildren(p);
+          })();
         }
       }, _ng);
     } else {
