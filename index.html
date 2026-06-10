@@ -598,25 +598,26 @@ window.addEventListener('DOMContentLoaded', async function() {
   // LIFF ID（Line Developers Console で発行済み）
   const LIFF_ID = '2010287060-4ppXejSr';
 
-  const isLine = typeof liff !== 'undefined';
+  const isLine    = typeof liff !== 'undefined';
+  const inClient  = isLine && liff.isInClient(); // init 前でも呼べる
   let profile    = null;
   let liffErrMsg = '';
 
   if (isLine) {
     try {
-      // タイムアウト付きで liff.init() を実行（5秒で諦めてモックへ）
+      // タイムアウト撤廃：LINE クライアント内なら init は速く終わるはず
+      // 外部ブラウザの場合は 20 秒でモックへ
       await Promise.race([
         liff.init({ liffId: LIFF_ID }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 15000))
+        new Promise((_, reject) => setTimeout(
+          () => reject(new Error('timeout(inClient=' + inClient + ')')), 20000))
       ]);
 
       if (!liff.isLoggedIn()) {
         if (liff.isInClient()) {
-          // LINE アプリ内のみログインリダイレクト
           liff.login({ redirectUri: location.href });
           return;
         }
-        // ブラウザからのアクセス → モックへ
         throw new Error('not in LINE client');
       }
 
