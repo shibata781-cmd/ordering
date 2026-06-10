@@ -744,14 +744,8 @@ window.addEventListener('DOMContentLoaded', async function() {
       // モック動作中または LINE アプリ外のアクセス
       (function() {
         var p = document.createElement('p');
-        p.style.cssText = 'color:#6b7280;font-size:.9rem;text-align:center;padding:24px;line-height:1.6';
-        p.textContent = 'LINE 公式アカウントのリッチメニューから\n「📦 発注する」をタップしてください。';
-        if (liffErrMsg) {
-          var span = document.createElement('span');
-          span.style.cssText = 'display:block;margin-top:8px;font-size:.7rem;color:#ef4444;word-break:break-all';
-          span.textContent = 'LIFF error: ' + liffErrMsg;
-          p.appendChild(span);
-        }
+        p.style.cssText = 'color:#6b7280;font-size:.85rem;text-align:center;padding:16px;line-height:1.8;word-break:break-all';
+        p.textContent = 'LINE公式リッチメニューから開いてください\n[DBG:' + liffDbg + ']';
         document.getElementById('loader').replaceChildren(p);
       })();
     }
